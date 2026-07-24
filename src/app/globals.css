@@ -1,26 +1,176 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-border: var(--border);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-success: var(--success);
+  --color-destructive: var(--destructive);
+  
+  --radius-lg: 1rem;
+  --radius-md: 0.75rem;
+  --radius-sm: 0.5rem;
+  
+  --animate-fade-in: fade-in 0.5s ease-out;
+  --animate-slide-up: slide-up 0.6s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slide-up {
+  from { transform: translateY(20px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+:root {
+  --background: hsl(40 20% 98%);
+  --foreground: hsl(20 14% 4%);
+  
+  --primary: hsl(38 75% 52%);
+  --primary-foreground: hsl(0 0% 100%);
+  
+  --secondary: hsl(38 12% 16%);
+  --secondary-foreground: hsl(38 20% 98%);
+  
+  --muted: hsl(38 10% 94%);
+  --muted-foreground: hsl(38 8% 45%);
+  
+  --border: hsl(38 10% 88%);
+  --card: hsl(0 0% 100%);
+  --card-foreground: hsl(20 14% 4%);
+  
+  --success: hsl(142.1 76.2% 36.3%);
+  --destructive: hsl(0 84.2% 60.2%);
+}
+
+/* System Dark Mode (default if no manual class overrides exist) */
 @media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+  :root:not(.light) {
+    --background: hsl(20 14% 4%);
+    --foreground: hsl(38 20% 98%);
+    
+    --primary: hsl(38 75% 52%);
+    --primary-foreground: hsl(20 14% 4%);
+    
+    --secondary: hsl(38 12% 8%);
+    --secondary-foreground: hsl(38 20% 98%);
+    
+    --muted: hsl(38 8% 12%);
+    --muted-foreground: hsl(38 5% 65%);
+    
+    --border: hsl(38 8% 18%);
+    --card: hsl(20 14% 7%);
+    --card-foreground: hsl(38 20% 98%);
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+/* Explicit Dark Mode override via class */
+:root.dark {
+  --background: hsl(20 14% 4%);
+  --foreground: hsl(38 20% 98%);
+  
+  --primary: hsl(38 75% 52%);
+  --primary-foreground: hsl(20 14% 4%);
+  
+  --secondary: hsl(38 12% 8%);
+  --secondary-foreground: hsl(38 20% 98%);
+  
+  --muted: hsl(38 8% 12%);
+  --muted-foreground: hsl(38 5% 65%);
+  
+  --border: hsl(38 8% 18%);
+  --card: hsl(20 14% 7%);
+  --card-foreground: hsl(38 20% 98%);
+}
+
+/* Explicit Light Mode override via class */
+:root.light {
+  --background: hsl(40 20% 98%);
+  --foreground: hsl(20 14% 4%);
+  
+  --primary: hsl(38 75% 52%);
+  --primary-foreground: hsl(0 0% 100%);
+  
+  --secondary: hsl(38 12% 16%);
+  --secondary-foreground: hsl(38 20% 98%);
+  
+  --muted: hsl(38 10% 94%);
+  --muted-foreground: hsl(38 8% 45%);
+  
+  --border: hsl(38 10% 88%);
+  --card: hsl(0 0% 100%);
+  --card-foreground: hsl(20 14% 4%);
+  
+  --success: hsl(142.1 76.2% 36.3%);
+  --destructive: hsl(0 84.2% 60.2%);
+}
+
+@layer base {
+  body {
+    background-color: var(--color-background);
+    color: var(--color-foreground);
+    font-family: var(--font-geist-sans), system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+    transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+    min-height: 100vh;
+  }
+  
+  /* Premium Glassmorphism class */
+  .glass {
+    background: rgba(var(--color-card), 0.75);
+    backdrop-filter: blur(12px);
+    border: 1px solid var(--color-border);
+  }
+
+  /* Style select dropdown arrow and options for both modes */
+  select {
+    cursor: pointer;
+  }
+  
+  select option {
+    background-color: var(--color-card);
+    color: var(--color-foreground);
+  }
+
+  /* Style date input indicators to be visible and styled in dark mode */
+  input[type="date"]::-webkit-calendar-picker-indicator {
+    cursor: pointer;
+    transition: filter 0.3s ease;
+  }
+
+  .dark input[type="date"]::-webkit-calendar-picker-indicator {
+    filter: invert(0.8) sepia(50%) saturate(1000%) hue-rotate(340deg);
+  }
+
+  /* Prevent Chrome autofill blue/white background from breaking dark mode aesthetics */
+  input:-webkit-autofill,
+  input:-webkit-autofill:hover, 
+  input:-webkit-autofill:focus,
+  input:-webkit-autofill:active {
+    -webkit-text-fill-color: var(--foreground) !important;
+    -webkit-box-shadow: 0 0 0 100px var(--card) inset !important;
+    transition: background-color 5000s ease-in-out 0s;
+  }
+}
+
+@utility glass-card {
+  background-color: color-mix(in srgb, var(--color-card) 75%, transparent);
+  backdrop-filter: blur(12px);
+  border: 1px solid var(--color-border);
+}
+
+@utility text-gold-gradient {
+  background: linear-gradient(135deg, hsl(38 85% 60%) 0%, hsl(38 75% 42%) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
 }
