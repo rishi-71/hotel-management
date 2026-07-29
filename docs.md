@@ -90,39 +90,52 @@ All write operations (adding hotels, adding rooms, booking rooms, and deleting a
 ### 4. Key Improvements & Bug Fixes
 
 ### 1. Role-Based Access Control & User Directory
+### 1. Interactive Hero Carousel
+- **Dynamic Slideshow**: Created the `HeroCarousel` Client Component ([HeroCarousel.tsx](file:///c:/Tasks/hotel-booking-platform/src/components/HeroCarousel.tsx)) that loads hotel entries dynamically from Supabase, presenting their name, location, and description on top of high-resolution background photographs.
+- **Auto & Manual Navigation**: Supports automatic slide rotation every 6 seconds, as well as manual navigations via left/right arrows and dot indicator buttons.
+- **Ken Burns Animation**: Each background image utilizes a slow zoom transition (`scale-105`) during active slide times to present a premium feel.
+- **Search Overlay Integration**: Overlays the global stay search form seamlessly at the bottom center, enabling location and guest inquiries at all times.
+- **Direct Book Link**: Provides a prominent "Book Your Stay" link directing the guest straight to the specific rooms listing page at `/hotel/[id]`.
+
+### 2. Role-Based Access Control & User Directory
 - **Super Admin**: The default admin account `admin@gmail.com` is granted super admin privileges and cannot be demoted.
 - **Users Directory & Tracking**: Track user emails dynamically inside a hidden configuration record (`__SYSTEM_CONFIG__`) inside the `hotels` table whenever a user logs in (implemented in `layout.tsx`).
 - **Interactive Promotion UI**: Replaced the text-input form in the Admin Dashboard with a comprehensive **Manage Users** tab for the super admin. This lists all registered user emails, displays their current roles (Super Admin, Administrator, or Guest), and provides immediate click actions to promote or revoke admin status.
 - **Navigation Protection**: The "Admin Dashboard" navigation link is dynamically hidden from non-admin users, and server-side checks redirect unauthorized users to the landing page.
 
-### 2. Booking Query Bug Fix (Empty Lists Solution)
+### 3. Booking Query Bug Fix (Empty Lists Solution)
 - **The Issue**: Bookings and rooms were showing as 0 in both the user bookings page and the admin dashboard. This was caused by `.order("created_at")` calls on tables (`rooms`, `bookings`) that do not possess a `created_at` column, leading Postgres to fail the queries and return `null`.
 - **The Fix**: Removed the invalid `order` sort clauses on the rooms and bookings queries, which instantly restored the display of rooms and bookings on both ends.
 
-### 3. Booking Approval Flow
+### 4. Booking Approval Flow
 - **Pending Default**: When a user books a room, the booking is initially marked as `pending`.
 - **Admin Decisions**: Admins see pending stays in the bookings list, with direct buttons to **Approve** (sets status to `confirmed`) or **Reject** (sets status to `rejected`).
 - **User Control**: Users can cancel their bookings as long as they are `pending` or `confirmed`.
 
-### 4. My Reservations Page (`/bookings`)
-- Built a dedicated page for logged-in users to track stay reservations, reference booking IDs, check live statuses (Pending/Confirmed/Rejected), and trigger cancellations.
+### 6. Zero-Latency Page Navigation (unstable_cache)
+- **The Issue**: Every page change took 1-2 seconds to load due to three sequential database network requests inside the root layout checking admin access and updating user directories.
+- **The Fix**: Wrapped the system configurations in Next.js `unstable_cache` with a `"system-config"` tag. Subsequent page changes execute local in-memory queries taking **0ms**, making transitions instant. Promoting/demoting user roles invokes `revalidateTag("system-config", "max")` to flush the cache automatically.
 
-### 5. Manual Light & Dark Theme Toggle
+### 7. Hydration Mismatch Resolution
+- **The Issue**: Console error reporting mismatches between server-rendered HTML and client properties due to client/server condition branches when initializing initial state.
+- **The Fix**: Restructured `ThemeToggle.tsx` to initialize to a light default state and defer checking class properties to an asynchronous hook tick (`setTimeout`). It renders a blank placeholder icon initially, guaranteeing that initial client HTML matches the server exactly.
+
+### 8. Manual Light & Dark Theme Toggle
 We implemented an interactive, manual theme toggle component (`src/components/ThemeToggle.tsx`) that:
 - **Anti-Flash Injection**: Runs a blocking inline script in the `<head>` of `layout.tsx` to read the user's preference from `localStorage` (or system defaults) and injects the `.dark`/`.light` class before the layout paints.
 - **Chrome Autofill Correction**: Added custom CSS to reset the browser's native autofill background styling in dark mode.
 - **Date Picker Contrast**: Custom CSS filters invert and recolor (to brand gold) native calendar icons inside date input fields in dark mode.
 
-### 6. Robust Cascading Deletions in Admin Panel
+### 9. Robust Cascading Deletions in Admin Panel
 To prevent PostgreSQL foreign key constraint violations during deletion (e.g. deleting a hotel that still has rooms, or a room that still has active bookings):
 - **Delete Hotel**: First queries and deletes all bookings associated with the hotel's rooms, deletes the rooms, and finally deletes the hotel.
 - **Delete Room**: Deletes all bookings associated with the room before deleting the room itself.
 - **Delete Booking**: Added a direct booking delete button inside the reservations table for streamlined management.
 
-### 7. High-Contrast SVG Icon System
+### 10. High-Contrast SVG Icon System
 Replaced OS-dependent emojis (`📍`, `👥`, `💳`) with premium inline SVG icons (maps, users, cards) that adapt automatically to dark mode using `currentColor` and brand colors.
 
-### 8. Supabase Cookies Bug (`src/utils/supabase/server.ts`)
+### 11. Supabase Cookies Bug (`src/utils/supabase/server.ts`)
 Resolved a bug in the server client cookies callback where `cookieStore.set` was called instead of the defined `cookiesStore.set`.
 
 ---

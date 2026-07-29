@@ -1,5 +1,6 @@
 import { createClient } from "@/utils/supabase/server";
 import Link from "next/link";
+import HeroCarousel from "@/components/HeroCarousel";
 
 interface HomeProps {
   searchParams: Promise<{
@@ -47,77 +48,8 @@ export default async function Home({ searchParams }: HomeProps) {
 
   return (
     <main className="flex-1">
-      {/* Hero Section */}
-      <section className="relative h-[80vh] flex items-center justify-center overflow-hidden">
-        {/* Background Image with Dark Overlay */}
-        <div 
-          className="absolute inset-0 bg-cover bg-center bg-no-repeat transition-transform duration-10000 hover:scale-105"
-          style={{ 
-            backgroundImage: "url('https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?auto=format&fit=crop&w=1920&q=80')" 
-          }}
-        />
-        <div className="absolute inset-0 bg-black/55 backdrop-blur-[2px]" />
-
-        {/* Hero Content */}
-        <div className="relative z-10 max-w-4xl mx-auto px-6 text-center text-white space-y-6">
-          <span className="text-xs uppercase tracking-widest text-primary font-semibold bg-primary/10 border border-primary/20 px-4 py-1.5 rounded-full backdrop-blur-sm animate-fade-in">
-            Welcome to luxury living
-          </span>
-          <h1 className="text-4xl md:text-6xl font-serif tracking-tight leading-tight animate-fade-in">
-            Experience Comfort, <br />
-            <span className="text-gold-gradient font-semibold">Redefined.</span>
-          </h1>
-          <p className="text-sm md:text-lg text-white/80 font-light max-w-xl mx-auto leading-relaxed animate-fade-in">
-            Discover handpicked luxury hotels and premium rooms tailored for your ultimate relaxation.
-          </p>
-
-          {/* Search Card Container */}
-          <div className="pt-8 animate-slide-up">
-            <form action="/" method="GET" className="grid grid-cols-1 sm:grid-cols-3 gap-3 p-3 bg-background/90 backdrop-blur-md rounded-xl shadow-2xl border border-border/20 text-foreground max-w-3xl mx-auto">
-              <div className="text-left px-3 py-2 border-b sm:border-b-0 sm:border-r border-border">
-                <label htmlFor="location-input" className="block text-[10px] uppercase font-bold text-muted-foreground tracking-wider mb-1">
-                  Destination
-                </label>
-                <input
-                  type="text"
-                  name="location"
-                  id="location-input"
-                  placeholder="Where are you going?"
-                  defaultValue={location || ""}
-                  className="w-full bg-transparent border-none text-sm p-0 focus:outline-none text-foreground font-medium placeholder:text-muted-foreground/45"
-                />
-              </div>
-
-              <div className="text-left px-3 py-2 border-b sm:border-b-0 sm:border-r border-border">
-                <label htmlFor="guests-input" className="block text-[10px] uppercase font-bold text-muted-foreground tracking-wider mb-1">
-                  Guests
-                </label>
-                <input
-                  type="number"
-                  name="guests"
-                  id="guests-input"
-                  placeholder="Number of guests"
-                  defaultValue={guests || ""}
-                  min={1}
-                  className="w-full bg-transparent border-none text-sm p-0 focus:outline-none text-foreground font-medium placeholder:text-muted-foreground/45"
-                />
-              </div>
-
-              <div className="flex items-center justify-center p-1">
-                <button
-                  type="submit"
-                  className="w-full bg-primary text-primary-foreground py-3 rounded-lg font-medium text-sm hover:opacity-95 transition-opacity shadow-md hover:shadow-primary/20 flex items-center justify-center gap-2 cursor-pointer"
-                >
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                  </svg>
-                  Search Stays
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      </section>
+      {/* Hero Carousel Section */}
+      <HeroCarousel hotels={hotels || []} initialLocation={location} initialGuests={guests} />
 
       {/* Featured Hotels Section */}
       <section className="max-w-7xl mx-auto px-6 py-20">
