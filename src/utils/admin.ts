@@ -12,6 +12,20 @@ const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
 // Plain client to query/mutate system config without accessing dynamic Next.js cookies() in cache scopes
 const supabasePlain = createSupabaseClient(supabaseUrl, supabaseAnonKey);
 
+// Cache active hotels list using Next.js unstable_cache
+export const getCachedHotelsList = unstable_cache(
+  async () => {
+    const { data } = await supabasePlain
+      .from("hotels")
+      .select("id, name")
+      .neq("name", "__SYSTEM_CONFIG__")
+      .order("name", { ascending: true });
+    return data || [];
+  },
+  ["hotels-list"],
+  { tags: ["system-config"] }
+);
+
 // Cache getSystemConfig database query using Next.js unstable_cache
 export const getSystemConfig = unstable_cache(
   async (): Promise<SystemConfig> => {

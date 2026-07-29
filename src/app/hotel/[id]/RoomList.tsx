@@ -2,7 +2,6 @@
 
 import React, { useState } from "react";
 import { bookRoom } from "./actions";
-import Link from "next/link";
 
 interface Room {
   id: string;
@@ -11,16 +10,23 @@ interface Room {
   capacity: number;
   price_per_night: number;
   image_url?: string;
+  features?: unknown;
 }
 
 interface RoomListProps {
   rooms: Room[];
-  isLoggedIn: boolean;
-  hotelId: string;
+  userEmail?: string;
+  userName?: string;
 }
 
-export default function RoomList({ rooms, isLoggedIn, hotelId }: RoomListProps) {
+// Configure a redirect URL after successful stay reservation submission (e.g. "https://example.com/payment" or "/bookings").
+// Leave empty string ("") to keep displaying the success message in the modal.
+const REDIRECT_URL_AFTER_BOOKING = "";
+
+export default function RoomList({ rooms, userEmail = "", userName = "" }: RoomListProps) {
   const [selectedRoom, setSelectedRoom] = useState<Room | null>(null);
+  const [guestName, setGuestName] = useState(userName);
+  const [guestEmail, setGuestEmail] = useState(userEmail);
   const [checkIn, setCheckIn] = useState("");
   const [checkOut, setCheckOut] = useState("");
   const [loading, setLoading] = useState(false);
@@ -48,7 +54,7 @@ export default function RoomList({ rooms, isLoggedIn, hotelId }: RoomListProps) 
 
   const handleBookingSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!selectedRoom || !isLoggedIn) return;
+    if (!selectedRoom) return;
 
     if (nights <= 0) {
       setError("Check-out date must be after check-in date.");
@@ -62,6 +68,8 @@ export default function RoomList({ rooms, isLoggedIn, hotelId }: RoomListProps) 
     try {
       const res = await bookRoom({
         roomId: selectedRoom.id,
+        guestName,
+        guestEmail,
         checkIn,
         checkOut,
         totalPrice: total
@@ -73,10 +81,17 @@ export default function RoomList({ rooms, isLoggedIn, hotelId }: RoomListProps) 
         setSuccess(true);
         setCheckIn("");
         setCheckOut("");
-        setTimeout(() => {
-          setSelectedRoom(null);
-          setSuccess(false);
-        }, 3000);
+        
+        if (REDIRECT_URL_AFTER_BOOKING) {
+          setTimeout(() => {
+            window.location.href = REDIRECT_URL_AFTER_BOOKING;
+          }, 1500);
+        } else {
+          setTimeout(() => {
+            setSelectedRoom(null);
+            setSuccess(false);
+          }, 3000);
+        }
       }
     } catch {
       setError("An unexpected error occurred. Please try again.");
@@ -84,6 +99,145 @@ export default function RoomList({ rooms, isLoggedIn, hotelId }: RoomListProps) 
       setLoading(false);
     }
   };
+
+interface RoomCardProps {
+  room: Room;
+  fallbackRoomImages: string[];
+  onBookNow: (room: Room) => void;
+}
+
+function RoomCard({ room, fallbackRoomImages, onBookNow }: RoomCardProps) {
+  const [imageIndex, setImageIndex] = useState(0);
+
+  // Parse features safely
+  const parseFeatures = (featuresVal: unknown): string[] => {
+    if (!featuresVal) return ["Air Conditioning", "High-speed Wi-Fi", "Flat-screen TV", "24/7 Room Service"];
+    if (Array.isArray(featuresVal)) return featuresVal;
+    if (typeof featuresVal === "string") {
+      try {
+        const parsed = JSON.parse(featuresVal);
+        if (Array.isArray(parsed)) return parsed;
+      } catch {}
+      return featuresVal.split(",").map((f: string) => f.trim()).filter(Boolean);
+    }
+    return ["Air Conditioning", "High-speed Wi-Fi", "Flat-screen TV", "24/7 Room Service"];
+  };
+
+  const features = parseFeatures(room.features);
+
+  // Combine room main image with fallback images for the carousel
+  const slideImages = [room.image_url, ...fallbackRoomImages].filter(Boolean) as string[];
+
+  const handlePrev = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setImageIndex((prev) => (prev - 1 + slideImages.length) % slideImages.length);
+  };
+
+  const handleNext = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setImageIndex((prev) => (prev + 1) % slideImages.length);
+  };
+
+  return (
+    <div className="group border border-border bg-card rounded-2xl overflow-hidden shadow-sm hover:shadow-lg transition-all duration-300 flex flex-col md:flex-row h-auto md:h-72 w-full gap-0">
+      {/* Left side: Clickable Image Carousel */}
+      <div className="w-full md:w-[42%] h-56 md:h-full relative overflow-hidden bg-muted select-none group/carousel shrink-0">
+        <img
+          src={slideImages[imageIndex]}
+          alt={room.type}
+          onClick={() => setImageIndex((prev) => (prev + 1) % slideImages.length)}
+          className="object-cover w-full h-full cursor-pointer transition-all duration-500 hover:scale-[1.02]"
+        />
+        
+        {/* Navigation arrows (shown on hover on desktop) */}
+        {slideImages.length > 1 && (
+          <>
+            <button
+              onClick={handlePrev}
+              className="absolute left-3 top-1/2 -translate-y-1/2 p-2 rounded-full bg-background/85 border border-border text-foreground hover:bg-primary hover:text-primary-foreground transition-all opacity-0 group-hover/carousel:opacity-100 cursor-pointer shadow-md z-10"
+              aria-label="Previous image"
+            >
+              <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
+              </svg>
+            </button>
+            <button
+              onClick={handleNext}
+              className="absolute right-3 top-1/2 -translate-y-1/2 p-2 rounded-full bg-background/85 border border-border text-foreground hover:bg-primary hover:text-primary-foreground transition-all opacity-0 group-hover/carousel:opacity-100 cursor-pointer shadow-md z-10"
+              aria-label="Next image"
+            >
+              <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+              </svg>
+            </button>
+          </>
+        )}
+
+        {/* Pricing tag */}
+        <div className="absolute top-4 left-4 bg-background/90 backdrop-blur-md px-3.5 py-1.5 rounded-lg border border-border/30 text-xs font-bold text-primary shadow-sm">
+          ₹{room.price_per_night.toLocaleString()}/night
+        </div>
+
+        {/* Carousel indicators (dots) */}
+        {slideImages.length > 1 && (
+          <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1 z-10">
+            {slideImages.map((_, i) => (
+              <button
+                key={i}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setImageIndex(i);
+                }}
+                className={`w-1.5 h-1.5 rounded-full transition-all cursor-pointer ${i === imageIndex ? "bg-primary w-3.5" : "bg-white/50"}`}
+                aria-label={`Go to slide ${i + 1}`}
+              />
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* Right side: Room details and Features */}
+      <div className="p-6 md:p-8 flex flex-col justify-between flex-1 bg-card">
+        <div className="space-y-4">
+          <div className="flex justify-between items-start">
+            <h3 className="text-xl font-bold text-foreground capitalize leading-none">{room.type}</h3>
+          </div>
+          
+          <div className="flex items-center gap-1.5 text-xs text-muted-foreground mt-1">
+            <svg className="w-4 h-4 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+            </svg>
+            Accommodates up to {room.capacity} {room.capacity === 1 ? "guest" : "guests"}
+          </div>
+
+          {/* Features list */}
+          <div className="pt-2">
+            <span className="block text-[10px] uppercase font-bold text-muted-foreground tracking-wider mb-2">Room Features</span>
+            <div className="flex flex-wrap gap-1.5">
+              {features.map((feature, i) => (
+                <span 
+                  key={i} 
+                  className="text-[10px] bg-primary/5 text-primary border border-primary/10 px-2.5 py-1 rounded-lg font-medium capitalize"
+                >
+                  {feature}
+                </span>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        <div className="pt-6 md:pt-0">
+          <button
+            onClick={() => onBookNow(room)}
+            className="w-full bg-secondary text-secondary-foreground text-xs font-semibold py-3 rounded-xl border border-border hover:bg-primary hover:text-primary-foreground hover:border-primary transition-all cursor-pointer shadow-sm active:scale-[0.98] duration-200"
+          >
+            Book Now
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
 
   const fallbackRoomImages = [
     "https://images.unsplash.com/photo-1618773928121-c32242e63f39?auto=format&fit=crop&w=600&q=80",
@@ -100,58 +254,22 @@ export default function RoomList({ rooms, isLoggedIn, hotelId }: RoomListProps) 
           <p className="text-muted-foreground">No rooms are currently listed for this hotel.</p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-          {rooms.map((room, index) => {
-            const image = room.image_url || fallbackRoomImages[index % fallbackRoomImages.length];
-            return (
-              <div 
-                key={room.id} 
-                className="group border border-border bg-card rounded-2xl overflow-hidden shadow-sm hover:shadow-lg transition-all duration-300 flex flex-col"
-              >
-                <div className="relative h-48 w-full overflow-hidden bg-muted">
-                  <img 
-                    src={image} 
-                    alt={room.type} 
-                    className="object-cover w-full h-full group-hover:scale-103 transition-transform duration-500"
-                  />
-                  <div className="absolute bottom-4 left-4 bg-background/95 backdrop-blur-md px-3.5 py-1.5 rounded-lg border border-border/30 text-xs font-bold text-primary">
-                    ₹{room.price_per_night.toLocaleString()}/night
-                  </div>
-                </div>
-
-                <div className="p-6 flex flex-col flex-1">
-                  <h3 className="text-lg font-bold text-foreground capitalize">{room.type}</h3>
-                  
-                  <div className="flex items-center gap-1.5 text-xs text-muted-foreground mt-2 mb-6">
-                    <svg className="w-4 h-4 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
-                    </svg>
-                    Accommodates up to {room.capacity} guests
-                  </div>
-
-                  {isLoggedIn ? (
-                    <button
-                      onClick={() => {
-                        setSelectedRoom(room);
-                        setError(null);
-                        setSuccess(false);
-                      }}
-                      className="mt-auto w-full bg-secondary text-secondary-foreground text-xs font-semibold py-3 rounded-lg border border-border hover:bg-primary hover:text-primary-foreground hover:border-primary transition-all cursor-pointer shadow-sm"
-                    >
-                      Book Now
-                    </button>
-                  ) : (
-                    <Link
-                      href={`/login?next=/hotel/${hotelId}`}
-                      className="mt-auto w-full bg-muted text-muted-foreground text-center text-xs font-semibold py-3 rounded-lg border border-border hover:bg-primary hover:text-primary-foreground hover:border-primary hover:shadow-md transition-all"
-                    >
-                      Sign in to Book
-                    </Link>
-                  )}
-                </div>
-              </div>
-            );
-          })}
+        <div className="grid grid-cols-1 gap-8">
+          {rooms.map((room) => (
+            <RoomCard
+              key={room.id}
+              room={room}
+              fallbackRoomImages={fallbackRoomImages}
+              onBookNow={(r) => {
+                setSelectedRoom(r);
+                setError(null);
+                setSuccess(false);
+                // Pre-fill name and email on click
+                if (!guestName && userName) setGuestName(userName);
+                if (!guestEmail && userEmail) setGuestEmail(userEmail);
+              }}
+            />
+          ))}
         </div>
       )}
 
@@ -194,6 +312,40 @@ export default function RoomList({ rooms, isLoggedIn, hotelId }: RoomListProps) 
                   </div>
                 )}
 
+                {/* Guest Contact Details */}
+                <div className="space-y-4">
+                  <div>
+                    <label htmlFor="guest-name" className="block text-[10px] uppercase font-bold text-muted-foreground tracking-wider mb-2">
+                      Full Name
+                    </label>
+                    <input
+                      type="text"
+                      id="guest-name"
+                      required
+                      placeholder="e.g. John Doe"
+                      value={guestName}
+                      onChange={(e) => setGuestName(e.target.value)}
+                      className="w-full px-4 py-2.5 rounded-lg border border-border bg-background text-foreground text-xs focus:outline-none focus:ring-1 focus:ring-primary focus:border-transparent transition-all"
+                    />
+                  </div>
+
+                  <div>
+                    <label htmlFor="guest-email" className="block text-[10px] uppercase font-bold text-muted-foreground tracking-wider mb-2">
+                      Email Address
+                    </label>
+                    <input
+                      type="email"
+                      id="guest-email"
+                      required
+                      placeholder="e.g. john@example.com"
+                      value={guestEmail}
+                      onChange={(e) => setGuestEmail(e.target.value)}
+                      className="w-full px-4 py-2.5 rounded-lg border border-border bg-background text-foreground text-xs focus:outline-none focus:ring-1 focus:ring-primary focus:border-transparent transition-all"
+                    />
+                  </div>
+                </div>
+
+                {/* Stay Dates */}
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <label htmlFor="check-in" className="block text-[10px] uppercase font-bold text-muted-foreground tracking-wider mb-2">

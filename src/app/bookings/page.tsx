@@ -12,11 +12,11 @@ export default async function UserBookingsPage() {
     redirect("/login?next=/bookings");
   }
 
-  // Fetch bookings for the logged-in user
+  // Fetch bookings for the logged-in user using their email address
   const { data: bookings } = await supabase
-    .from("bookings")
+    .from("booking_records")
     .select("*, rooms(*, hotels(*))")
-    .eq("user_id", user.id);
+    .eq("guest_email", user.email);
 
   // Cancel booking action
   async function cancelUserBooking(formData: FormData) {
@@ -25,7 +25,7 @@ export default async function UserBookingsPage() {
     const bookingId = formData.get("bookingId") as string;
 
     const { error } = await supabase
-      .from("bookings")
+      .from("booking_records")
       .update({ status: "cancelled" })
       .eq("id", bookingId);
 

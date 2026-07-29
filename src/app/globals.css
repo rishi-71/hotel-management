@@ -34,19 +34,19 @@
 }
 
 :root {
-  --background: hsl(40 20% 98%);
+  --background: hsl(35 25% 94%);
   --foreground: hsl(20 14% 4%);
   
   --primary: hsl(38 75% 52%);
   --primary-foreground: hsl(0 0% 100%);
   
   --secondary: hsl(38 12% 16%);
-  --secondary-foreground: hsl(38 20% 98%);
+  --secondary-foreground: hsl(35 20% 96%);
   
-  --muted: hsl(38 10% 94%);
+  --muted: hsl(35 20% 88%);
   --muted-foreground: hsl(38 8% 45%);
   
-  --border: hsl(38 10% 88%);
+  --border: hsl(35 15% 83%);
   --card: hsl(0 0% 100%);
   --card-foreground: hsl(20 14% 4%);
   
@@ -57,58 +57,58 @@
 /* System Dark Mode (default if no manual class overrides exist) */
 @media (prefers-color-scheme: dark) {
   :root:not(.light) {
-    --background: hsl(20 14% 4%);
-    --foreground: hsl(38 20% 98%);
+    --background: hsl(30 10% 6%);
+    --foreground: hsl(35 20% 96%);
     
     --primary: hsl(38 75% 52%);
-    --primary-foreground: hsl(20 14% 4%);
+    --primary-foreground: hsl(30 10% 6%);
     
-    --secondary: hsl(38 12% 8%);
-    --secondary-foreground: hsl(38 20% 98%);
+    --secondary: hsl(38 10% 12%);
+    --secondary-foreground: hsl(35 20% 96%);
     
-    --muted: hsl(38 8% 12%);
-    --muted-foreground: hsl(38 5% 65%);
+    --muted: hsl(30 10% 14%);
+    --muted-foreground: hsl(35 10% 65%);
     
-    --border: hsl(38 8% 18%);
-    --card: hsl(20 14% 7%);
-    --card-foreground: hsl(38 20% 98%);
+    --border: hsl(30 8% 18%);
+    --card: hsl(30 10% 10%);
+    --card-foreground: hsl(35 20% 96%);
   }
 }
 
 /* Explicit Dark Mode override via class */
 :root.dark {
-  --background: hsl(20 14% 4%);
-  --foreground: hsl(38 20% 98%);
+  --background: hsl(30 10% 6%);
+  --foreground: hsl(35 20% 96%);
   
   --primary: hsl(38 75% 52%);
-  --primary-foreground: hsl(20 14% 4%);
+  --primary-foreground: hsl(30 10% 6%);
   
-  --secondary: hsl(38 12% 8%);
-  --secondary-foreground: hsl(38 20% 98%);
+  --secondary: hsl(38 10% 12%);
+  --secondary-foreground: hsl(35 20% 96%);
   
-  --muted: hsl(38 8% 12%);
-  --muted-foreground: hsl(38 5% 65%);
+  --muted: hsl(30 10% 14%);
+  --muted-foreground: hsl(35 10% 65%);
   
-  --border: hsl(38 8% 18%);
-  --card: hsl(20 14% 7%);
-  --card-foreground: hsl(38 20% 98%);
+  --border: hsl(30 8% 18%);
+  --card: hsl(30 10% 10%);
+  --card-foreground: hsl(35 20% 96%);
 }
 
 /* Explicit Light Mode override via class */
 :root.light {
-  --background: hsl(40 20% 98%);
+  --background: hsl(35 25% 94%);
   --foreground: hsl(20 14% 4%);
   
   --primary: hsl(38 75% 52%);
   --primary-foreground: hsl(0 0% 100%);
   
   --secondary: hsl(38 12% 16%);
-  --secondary-foreground: hsl(38 20% 98%);
+  --secondary-foreground: hsl(35 20% 96%);
   
-  --muted: hsl(38 10% 94%);
+  --muted: hsl(35 20% 88%);
   --muted-foreground: hsl(38 8% 45%);
   
-  --border: hsl(38 10% 88%);
+  --border: hsl(35 15% 83%);
   --card: hsl(0 0% 100%);
   --card-foreground: hsl(20 14% 4%);
   

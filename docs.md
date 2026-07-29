@@ -112,7 +112,17 @@ All write operations (adding hotels, adding rooms, booking rooms, and deleting a
 - **Admin Decisions**: Admins see pending stays in the bookings list, with direct buttons to **Approve** (sets status to `confirmed`) or **Reject** (sets status to `rejected`).
 - **User Control**: Users can cancel their bookings as long as they are `pending` or `confirmed`.
 
-### 6. Zero-Latency Page Navigation (unstable_cache)
+### 5. Header Dropdown & Link Promotion
+- **Indore's Top Hotels Dropdown**: Added a custom `NavbarDropdown` component inside the sticky header. It queries active hotels dynamically from the database and lists them inside a styled dropdown overlay for direct stay details redirection on click.
+- **Navbar Links Promotion**: Moved "Support" and "Contact Us" links from the footer to the header navigation. Removed redundant footer link lists.
+- **Responsive Mobile Navigation**: Created the `Header` client component ([Header.tsx](file:///c:/Tasks/hotel-booking-platform/src/components/Header.tsx)) to wrap navbar links, theme toggler, and drop-down menu. Displays a clean hamburger menu on mobile that toggles a sliding menu overlay for fully mobile-friendly navigation.
+
+### 6. Horizontal Room Cards & Clickable Carousels
+- **Horizontal Layout**: Redesigned rooms listing in [RoomList.tsx](file:///c:/Tasks/hotel-booking-platform/src/app/hotel/[id]/RoomList.tsx) from vertical card grids into sleek, full-width horizontal cards (`RoomCard`) on desktop. Automatically stacks vertically on mobile devices.
+- **Clickable Carousel**: Renders room and fallback hotel images inside a client-side clickable carousel on the left. Guests can click next/prev arrows, dot indicators, or tap the image itself to slide through room photographs.
+- **Rich Room Details & Features**: Displays name, stay pricing, capacity, and custom gold-tinted feature tags on the right, matching the premium visual guidelines.
+
+### 7. Zero-Latency Page Navigation (unstable_cache)
 - **The Issue**: Every page change took 1-2 seconds to load due to three sequential database network requests inside the root layout checking admin access and updating user directories.
 - **The Fix**: Wrapped the system configurations in Next.js `unstable_cache` with a `"system-config"` tag. Subsequent page changes execute local in-memory queries taking **0ms**, making transitions instant. Promoting/demoting user roles invokes `revalidateTag("system-config", "max")` to flush the cache automatically.
 
@@ -157,3 +167,40 @@ Supabase tables have Row-Level Security (RLS) enabled. By default, write queries
 3. **Log In**: Log in at `/login` to establish a session, then test room booking and admin controls!
 4. **Admin Dashboard**: Visit `/admin` to add hotels, list rooms, and manage reservations. You can delete items cleanly thanks to cascading deletion handling.
 5. **Manage Users Directory**: Log in as `admin@gmail.com` to access the "Manage Users" tab and promote/revoke admin access for any registered user email. User emails populate automatically as they interact with the platform.
+
+### 3. Setting up the `booking_records` Table
+Since the user reservation checkout collects details (`name`, `emailid`, and stay durations) and logs them into a new `booking_records` table, you need to initialize it in your database:
+1. Open your **Supabase Dashboard**.
+2. Click on the **SQL Editor** tab in the sidebar.
+3. Click **New Query**, paste the following DDL statement, and click **Run**:
+
+```sql
+CREATE TABLE public.booking_records (
+    id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+    room_id UUID REFERENCES public.rooms(id) ON DELETE CASCADE,
+    guest_name TEXT NOT NULL,
+    guest_email TEXT NOT NULL,
+    check_in DATE NOT NULL,
+    check_out DATE NOT NULL,
+    total_price NUMERIC NOT NULL,
+    status TEXT DEFAULT 'pending' NOT NULL,
+    hotel_name TEXT,
+    room_type TEXT,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
+);
+
+-- Enable RLS and insert permissions for anonymous checkout
+ALTER TABLE public.booking_records ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Allow public inserts" ON public.booking_records FOR INSERT WITH CHECK (true);
+CREATE POLICY "Allow public select" ON public.booking_records FOR SELECT USING (true);
+CREATE POLICY "Allow public update" ON public.booking_records FOR UPDATE USING (true);
+CREATE POLICY "Allow public delete" ON public.booking_records FOR DELETE USING (true);
+```
+
+### 4. Updating an Existing Table
+If you already created the `booking_records` table, run the following SQL statement in your **Supabase SQL Editor** to add the plain English hotel and room descriptor columns:
+
+```sql
+ALTER TABLE public.booking_records ADD COLUMN hotel_name TEXT;
+ALTER TABLE public.booking_records ADD COLUMN room_type TEXT;
+```

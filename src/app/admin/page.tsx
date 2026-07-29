@@ -1,5 +1,5 @@
 import { createClient } from "@/utils/supabase/server";
-import { revalidatePath } from "next/cache";
+import { revalidatePath, revalidateTag } from "next/cache";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { isAdmin, promoteToAdmin, demoteFromAdmin, getSystemConfig } from "@/utils/admin";
@@ -46,6 +46,7 @@ export default async function AdminDashboard({ searchParams }: AdminDashboardPro
       return;
     }
     revalidatePath("/admin");
+    revalidateTag("system-config", "max");
   }
 
   async function deleteHotel(formData: FormData) {
@@ -58,7 +59,7 @@ export default async function AdminDashboard({ searchParams }: AdminDashboardPro
     if (roomsToDelete && roomsToDelete.length > 0) {
       const roomIds = roomsToDelete.map(r => r.id);
       // Delete bookings of these rooms first to satisfy foreign key constraint
-      await supabase.from("bookings").delete().in("room_id", roomIds);
+      await supabase.from("booking_records").delete().in("room_id", roomIds);
       // Delete rooms of this hotel
       await supabase.from("rooms").delete().in("id", roomIds);
     }
@@ -69,6 +70,7 @@ export default async function AdminDashboard({ searchParams }: AdminDashboardPro
       return;
     }
     revalidatePath("/admin");
+    revalidateTag("system-config", "max");
   }
 
   async function addRoom(formData: FormData) {
@@ -97,7 +99,7 @@ export default async function AdminDashboard({ searchParams }: AdminDashboardPro
     const roomId = formData.get("roomId") as string;
 
     // Delete bookings of this room first to satisfy foreign key constraint
-    await supabase.from("bookings").delete().eq("room_id", roomId);
+    await supabase.from("booking_records").delete().eq("room_id", roomId);
 
     const { error } = await supabase.from("rooms").delete().eq("id", roomId);
     if (error) {
@@ -113,7 +115,7 @@ export default async function AdminDashboard({ searchParams }: AdminDashboardPro
     const bookingId = formData.get("bookingId") as string;
 
     const { error } = await supabase
-      .from("bookings")
+      .from("booking_records")
       .update({ status: "cancelled" })
       .eq("id", bookingId);
 
@@ -129,7 +131,7 @@ export default async function AdminDashboard({ searchParams }: AdminDashboardPro
     const supabase = await createClient();
     const bookingId = formData.get("bookingId") as string;
 
-    const { error } = await supabase.from("bookings").delete().eq("id", bookingId);
+    const { error } = await supabase.from("booking_records").delete().eq("id", bookingId);
     if (error) {
       console.error("Error deleting booking: ", error);
       return;
@@ -143,7 +145,7 @@ export default async function AdminDashboard({ searchParams }: AdminDashboardPro
     const bookingId = formData.get("bookingId") as string;
 
     const { error } = await supabase
-      .from("bookings")
+      .from("booking_records")
       .update({ status: "confirmed" })
       .eq("id", bookingId);
 
@@ -160,7 +162,7 @@ export default async function AdminDashboard({ searchParams }: AdminDashboardPro
     const bookingId = formData.get("bookingId") as string;
 
     const { error } = await supabase
-      .from("bookings")
+      .from("booking_records")
       .update({ status: "rejected" })
       .eq("id", bookingId);
 
@@ -200,9 +202,21 @@ export default async function AdminDashboard({ searchParams }: AdminDashboardPro
     .from("rooms")
     .select("*, hotels(name)");
 
-  const { data: bookings } = await supabase
-    .from("bookings")
-    .select("*, rooms(type, hotels(name))");
+  // Fetch bookings from booking_records, handle table missing gracefully
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  let bookings: any[] = [];
+  try {
+    const { data: bookingsData, error: bookingsError } = await supabase
+      .from("booking_records")
+      .select("*, rooms(type, hotels(name))");
+    if (!bookingsError && bookingsData) {
+      bookings = bookingsData;
+    } else if (bookingsError) {
+      console.warn("Failed to fetch booking_records, table might be missing:", bookingsError.message);
+    }
+  } catch (err) {
+    console.error("Exception fetching booking_records:", err);
+  }
 
   // Fetch system config data if super admin to manage roles
   const configData = isSuperAdmin ? await getSystemConfig() : { admins: [], users: [] };
@@ -540,7 +554,7 @@ export default async function AdminDashboard({ searchParams }: AdminDashboardPro
                 <table className="w-full border-collapse text-left text-xs">
                   <thead className="bg-muted border-b border-border uppercase font-semibold text-muted-foreground tracking-wider text-[10px]">
                     <tr>
-                      <th className="px-6 py-4">Guest Reference</th>
+                      <th className="px-6 py-4">Guest Info</th>
                       <th className="px-6 py-4">Hotel / Room</th>
                       <th className="px-6 py-4">Stay Dates</th>
                       <th className="px-6 py-4">Bill Amount</th>
@@ -551,8 +565,9 @@ export default async function AdminDashboard({ searchParams }: AdminDashboardPro
                   <tbody className="divide-y divide-border text-foreground">
                     {bookings?.map((booking) => (
                       <tr key={booking.id} className="hover:bg-muted/30 transition-colors">
-                        <td className="px-6 py-4 font-mono text-[10px] text-muted-foreground">
-                          {booking.user_id ? `${booking.user_id.slice(0, 8)}...` : "N/A"}
+                        <td className="px-6 py-4">
+                          <div className="font-semibold text-foreground">{booking.guest_name || "Guest User"}</div>
+                          <div className="text-[10px] text-muted-foreground mt-0.5">{booking.guest_email || "N/A"}</div>
                         </td>
                         <td className="px-6 py-4">
                           <div className="font-bold capitalize">

@@ -4,8 +4,8 @@ import "./globals.css";
 import { createClient } from "@/utils/supabase/server";
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import ThemeToggle from "@/components/ThemeToggle";
-import { isAdmin, registerUserEmail } from "@/utils/admin";
+import Header from "@/components/Header";
+import { isAdmin, registerUserEmail, getCachedHotelsList } from "@/utils/admin";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -32,9 +32,15 @@ export default async function RootLayout({
   // Get active session
   const { data: { user } } = await supabase.auth.getUser();
   if (user) {
-    await registerUserEmail(user.email);
+    // Register user email in the background without blocking render
+    registerUserEmail(user.email).catch(console.error);
   }
-  const userIsAdmin = user ? await isAdmin(user.email) : false;
+
+  // Parallelize authentication role checking and cache-retrieval for instant load times (0ms queries)
+  const [userIsAdmin, dropdownHotels] = await Promise.all([
+    user ? isAdmin(user.email) : Promise.resolve(false),
+    getCachedHotelsList()
+  ]);
 
   async function handleSignOut() {
     "use server";
@@ -71,67 +77,13 @@ export default async function RootLayout({
         />
       </head>
       <body className="min-h-full flex flex-col bg-background text-foreground">
-        {/* Sticky Header with Glassmorphism */}
-        <header className="sticky top-0 z-50 w-full border-b border-border bg-background/80 backdrop-blur-md">
-          <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
-            {/* Logo */}
-            <Link href="/" className="flex items-center gap-2 text-2xl font-bold tracking-wider text-foreground hover:opacity-90 transition-opacity">
-              <span className="text-primary font-serif">L</span>UXE<span className="text-primary font-serif">S</span>TAY
-            </Link>
-
-            {/* Navigation links */}
-            <nav className="hidden md:flex items-center gap-8">
-              <Link href="/" className="text-sm font-medium hover:text-primary transition-colors">
-                Home
-              </Link>
-              {user && (
-                <Link href="/bookings" className="text-sm font-medium hover:text-primary transition-colors">
-                  My Bookings
-                </Link>
-              )}
-              {userIsAdmin && (
-                <Link href="/admin" className="text-sm font-medium hover:text-primary transition-colors">
-                  Admin Dashboard
-                </Link>
-              )}
-            </nav>
-
-            {/* Auth section */}
-            <div className="flex items-center gap-4">
-              <ThemeToggle />
-              {user ? (
-                <div className="flex items-center gap-4">
-                  <span className="hidden sm:inline text-xs text-muted-foreground bg-muted px-3 py-1.5 rounded-full border border-border">
-                    {user.email}
-                  </span>
-                  <form action={handleSignOut}>
-                    <button
-                      type="submit"
-                      className="text-xs font-semibold bg-secondary text-secondary-foreground hover:bg-primary hover:text-primary-foreground border border-border px-4 py-2 rounded-lg cursor-pointer transition-all duration-300 hover:shadow-md"
-                    >
-                      Sign Out
-                    </button>
-                  </form>
-                </div>
-              ) : (
-                <div className="flex items-center gap-3">
-                  <Link
-                    href="/login"
-                    className="text-xs font-semibold text-foreground hover:text-primary transition-colors px-4 py-2"
-                  >
-                    Sign In
-                  </Link>
-                  <Link
-                    href="/signup"
-                    className="text-xs font-semibold bg-primary text-primary-foreground hover:opacity-95 px-4 py-2 rounded-lg cursor-pointer transition-all shadow-sm hover:shadow-primary/25"
-                  >
-                    Register
-                  </Link>
-                </div>
-              )}
-            </div>
-          </div>
-        </header>
+        {/* Sticky Header with responsive Client-side rendering */}
+        <Header 
+          user={user} 
+          userIsAdmin={userIsAdmin} 
+          dropdownHotels={dropdownHotels || []} 
+          signOutAction={handleSignOut} 
+        />
 
         {/* Main Content Area */}
         <div className="flex-1 flex flex-col">{children}</div>
@@ -156,14 +108,7 @@ export default async function RootLayout({
               </ul>
             </div>
 
-            <div>
-              <h4 className="text-xs font-bold uppercase tracking-widest text-primary mb-4">Support</h4>
-              <ul className="space-y-2.5 text-xs text-muted-foreground">
-                <li><a href="#" className="hover:text-primary transition-colors">Contact Us</a></li>
-                <li><a href="#" className="hover:text-primary transition-colors">FAQs</a></li>
-                <li><a href="#" className="hover:text-primary transition-colors">Terms of Service</a></li>
-              </ul>
-            </div>
+
 
             <div>
               <h4 className="text-xs font-bold uppercase tracking-widest text-primary mb-4">Newsletter</h4>
