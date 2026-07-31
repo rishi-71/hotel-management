@@ -31,7 +31,7 @@ export default function SignupPage() {
       } else {
         setMessage({
           type: "success",
-          text: "Registration successful! Please check your email for the confirmation link to complete your sign-up.",
+          text: "Registration successful! You can now sign in with your credentials.",
         });
         setEmail("");
         setPassword("");
