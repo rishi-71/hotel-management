@@ -32,6 +32,7 @@ export default function RoomList({ rooms, userEmail = "", userName = "" }: RoomL
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
+  const [guestPhone, setGuestPhone] = useState("");
 
   // Calculate booking details
   const getBookingDetails = () => {
@@ -70,6 +71,7 @@ export default function RoomList({ rooms, userEmail = "", userName = "" }: RoomL
         roomId: selectedRoom.id,
         guestName,
         guestEmail,
+        guestPhone,
         checkIn,
         checkOut,
         totalPrice: total
@@ -81,6 +83,7 @@ export default function RoomList({ rooms, userEmail = "", userName = "" }: RoomL
         setSuccess(true);
         setCheckIn("");
         setCheckOut("");
+        setGuestPhone("");
         
         if (REDIRECT_URL_AFTER_BOOKING) {
           setTimeout(() => {
@@ -340,6 +343,21 @@ function RoomCard({ room, fallbackRoomImages, onBookNow }: RoomCardProps) {
                       placeholder="e.g. john@example.com"
                       value={guestEmail}
                       onChange={(e) => setGuestEmail(e.target.value)}
+                      className="w-full px-4 py-2.5 rounded-lg border border-border bg-background text-foreground text-xs focus:outline-none focus:ring-1 focus:ring-primary focus:border-transparent transition-all"
+                    />
+                  </div>
+
+                  <div>
+                    <label htmlFor="guest-phone" className="block text-[10px] uppercase font-bold text-muted-foreground tracking-wider mb-2">
+                      Contact Number
+                    </label>
+                    <input
+                      type="tel"
+                      id="guest-phone"
+                      required
+                      placeholder="e.g. +91 98765 43210"
+                      value={guestPhone}
+                      onChange={(e) => setGuestPhone(e.target.value)}
                       className="w-full px-4 py-2.5 rounded-lg border border-border bg-background text-foreground text-xs focus:outline-none focus:ring-1 focus:ring-primary focus:border-transparent transition-all"
                     />
                   </div>

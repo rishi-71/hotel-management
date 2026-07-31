@@ -12,6 +12,7 @@ export async function bookRoom(formData: {
   roomId: string;
   guestName: string;
   guestEmail: string;
+  guestPhone: string;
   checkIn: string;
   checkOut: string;
   totalPrice: number;
@@ -37,10 +38,11 @@ export async function bookRoom(formData: {
       room_id: formData.roomId,
       guest_name: formData.guestName,
       guest_email: formData.guestEmail,
+      guest_phone: formData.guestPhone,
       check_in: formData.checkIn,
       check_out: formData.checkOut,
       total_price: formData.totalPrice,
-      status: "pending",
+      status: "confirmed",
       hotel_name: hotelName,
       room_type: roomType
     }

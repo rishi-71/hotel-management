@@ -13,8 +13,6 @@ interface Hotel {
 
 interface HeroCarouselProps {
   hotels: Hotel[];
-  initialLocation?: string;
-  initialGuests?: string;
 }
 
 const fallbackImages = [
@@ -24,7 +22,7 @@ const fallbackImages = [
   "https://images.unsplash.com/photo-1584132967334-10e028bd69f7?auto=format&fit=crop&w=1920&q=80"
 ];
 
-export default function HeroCarousel({ hotels, initialLocation = "", initialGuests = "" }: HeroCarouselProps) {
+export default function HeroCarousel({ hotels }: HeroCarouselProps) {
   const [activeIndex, setActiveIndex] = useState(0);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -168,7 +166,7 @@ export default function HeroCarousel({ hotels, initialLocation = "", initialGues
 
       {/* Dot Indicators */}
       {displaySlides.length > 1 && (
-        <div className="absolute bottom-36 z-20 flex gap-2.5">
+        <div className="absolute bottom-10 z-20 flex gap-2.5">
           {displaySlides.map((_, index) => (
             <button
               key={index}
@@ -181,56 +179,6 @@ export default function HeroCarousel({ hotels, initialLocation = "", initialGues
           ))}
         </div>
       )}
-
-      {/* Fixed Search Card Overlay at the very bottom center of the hero */}
-      <div className="absolute bottom-6 left-0 right-0 z-20 max-w-4xl mx-auto px-6">
-        <form
-          action="/"
-          method="GET"
-          className="grid grid-cols-1 sm:grid-cols-3 gap-3 p-3 bg-background/95 backdrop-blur-md rounded-xl shadow-2xl border border-border/20 text-foreground max-w-3xl mx-auto"
-        >
-          <div className="text-left px-3 py-2 border-b sm:border-b-0 sm:border-r border-border">
-            <label htmlFor="location-input" className="block text-[10px] uppercase font-bold text-muted-foreground tracking-wider mb-1">
-              Destination
-            </label>
-            <input
-              type="text"
-              name="location"
-              id="location-input"
-              placeholder="Where are you going?"
-              defaultValue={initialLocation}
-              className="w-full bg-transparent border-none text-sm p-0 focus:outline-none text-foreground font-medium placeholder:text-muted-foreground/45"
-            />
-          </div>
-
-          <div className="text-left px-3 py-2 border-b sm:border-b-0 sm:border-r border-border">
-            <label htmlFor="guests-input" className="block text-[10px] uppercase font-bold text-muted-foreground tracking-wider mb-1">
-              Guests
-            </label>
-            <input
-              type="number"
-              name="guests"
-              id="guests-input"
-              placeholder="Number of guests"
-              defaultValue={initialGuests}
-              min={1}
-              className="w-full bg-transparent border-none text-sm p-0 focus:outline-none text-foreground font-medium placeholder:text-muted-foreground/45"
-            />
-          </div>
-
-          <div className="flex items-center justify-center p-1.5">
-            <button
-              type="submit"
-              className="w-full h-full bg-primary text-primary-foreground hover:opacity-90 font-semibold text-xs uppercase tracking-wider px-5 py-3 rounded-lg transition-all cursor-pointer flex items-center justify-center gap-1.5 shadow"
-            >
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
-              </svg>
-              Search Stays
-            </button>
-          </div>
-        </form>
-      </div>
     </section>
   );
 }

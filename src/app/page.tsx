@@ -49,7 +49,7 @@ export default async function Home({ searchParams }: HomeProps) {
   return (
     <main className="flex-1">
       {/* Hero Carousel Section */}
-      <HeroCarousel hotels={hotels || []} initialLocation={location} initialGuests={guests} />
+      <HeroCarousel hotels={hotels || []} />
 
       {/* Featured Hotels Section */}
       <section className="max-w-7xl mx-auto px-6 py-20">

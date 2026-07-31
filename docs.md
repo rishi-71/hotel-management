@@ -180,6 +180,7 @@ CREATE TABLE public.booking_records (
     room_id UUID REFERENCES public.rooms(id) ON DELETE CASCADE,
     guest_name TEXT NOT NULL,
     guest_email TEXT NOT NULL,
+    guest_phone TEXT NOT NULL,
     check_in DATE NOT NULL,
     check_out DATE NOT NULL,
     total_price NUMERIC NOT NULL,
@@ -198,9 +199,10 @@ CREATE POLICY "Allow public delete" ON public.booking_records FOR DELETE USING (
 ```
 
 ### 4. Updating an Existing Table
-If you already created the `booking_records` table, run the following SQL statement in your **Supabase SQL Editor** to add the plain English hotel and room descriptor columns:
+If you already created the `booking_records` table, run the following SQL statement in your **Supabase SQL Editor** to add the plain English hotel, room descriptor, and guest contact columns:
 
 ```sql
 ALTER TABLE public.booking_records ADD COLUMN hotel_name TEXT;
 ALTER TABLE public.booking_records ADD COLUMN room_type TEXT;
+ALTER TABLE public.booking_records ADD COLUMN guest_phone TEXT;
 ```

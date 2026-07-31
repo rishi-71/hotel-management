@@ -3,6 +3,8 @@ import { revalidatePath, revalidateTag } from "next/cache";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { isAdmin, promoteToAdmin, demoteFromAdmin, getSystemConfig } from "@/utils/admin";
+import AddHotelForm from "@/components/AddHotelForm";
+import AddRoomForm from "@/components/AddRoomForm";
 
 interface AdminDashboardProps {
   searchParams: Promise<{
@@ -109,22 +111,7 @@ export default async function AdminDashboard({ searchParams }: AdminDashboardPro
     revalidatePath("/admin");
   }
 
-  async function cancelBooking(formData: FormData) {
-    "use server";
-    const supabase = await createClient();
-    const bookingId = formData.get("bookingId") as string;
 
-    const { error } = await supabase
-      .from("booking_records")
-      .update({ status: "cancelled" })
-      .eq("id", bookingId);
-
-    if (error) {
-      console.error("Error cancelling booking: ", error);
-      return;
-    }
-    revalidatePath("/admin");
-  }
 
   async function deleteBooking(formData: FormData) {
     "use server";
@@ -139,39 +126,7 @@ export default async function AdminDashboard({ searchParams }: AdminDashboardPro
     revalidatePath("/admin");
   }
 
-  async function approveBooking(formData: FormData) {
-    "use server";
-    const supabase = await createClient();
-    const bookingId = formData.get("bookingId") as string;
 
-    const { error } = await supabase
-      .from("booking_records")
-      .update({ status: "confirmed" })
-      .eq("id", bookingId);
-
-    if (error) {
-      console.error("Error approving booking: ", error);
-      return;
-    }
-    revalidatePath("/admin");
-  }
-
-  async function rejectBooking(formData: FormData) {
-    "use server";
-    const supabase = await createClient();
-    const bookingId = formData.get("bookingId") as string;
-
-    const { error } = await supabase
-      .from("booking_records")
-      .update({ status: "rejected" })
-      .eq("id", bookingId);
-
-    if (error) {
-      console.error("Error rejecting booking: ", error);
-      return;
-    }
-    revalidatePath("/admin");
-  }
 
   async function promoteAction(formData: FormData) {
     "use server";
@@ -289,61 +244,8 @@ export default async function AdminDashboard({ searchParams }: AdminDashboardPro
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
           {/* Add Hotel Form */}
           <div className="bg-card border border-border p-6 rounded-2xl shadow-sm h-fit">
-            <h2 className="text-lg font-serif text-foreground mb-6">Register Luxury Hotel</h2>
-            <form action={addHotel} className="space-y-4">
-              <div>
-                <label htmlFor="name" className="block text-[10px] uppercase font-bold text-muted-foreground tracking-wider mb-2">Hotel Name</label>
-                <input
-                  type="text"
-                  name="name"
-                  id="name"
-                  required
-                  placeholder="e.g., Grand Plaza Resort"
-                  className="w-full border border-border rounded-lg px-4 py-2.5 bg-background text-foreground text-xs focus:outline-none focus:ring-1 focus:ring-primary focus:border-transparent transition-all placeholder:text-muted-foreground/45"
-                />
-              </div>
-
-              <div>
-                <label htmlFor="location" className="block text-[10px] uppercase font-bold text-muted-foreground tracking-wider mb-2">Location</label>
-                <input
-                  type="text"
-                  name="location"
-                  id="location"
-                  required
-                  placeholder="e.g., Indore, Madhya Pradesh"
-                  className="w-full border border-border rounded-lg px-4 py-2.5 bg-background text-foreground text-xs focus:outline-none focus:ring-1 focus:ring-primary focus:border-transparent transition-all placeholder:text-muted-foreground/45"
-                />
-              </div>
-
-              <div>
-                <label htmlFor="description" className="block text-[10px] uppercase font-bold text-muted-foreground tracking-wider mb-2">Description</label>
-                <textarea
-                  name="description"
-                  id="description"
-                  rows={4}
-                  placeholder="Tell us about this luxury stay..."
-                  className="w-full border border-border rounded-lg px-4 py-2.5 bg-background text-foreground text-xs focus:outline-none focus:ring-1 focus:ring-primary focus:border-transparent transition-all placeholder:text-muted-foreground/45"
-                />
-              </div>
-
-              <div>
-                <label htmlFor="image_url" className="block text-[10px] uppercase font-bold text-muted-foreground tracking-wider mb-2">Image URL (Optional)</label>
-                <input
-                  type="url"
-                  name="image_url"
-                  id="image_url"
-                  placeholder="https://example.com/photo.jpg"
-                  className="w-full border border-border rounded-lg px-4 py-2.5 bg-background text-foreground text-xs focus:outline-none focus:ring-1 focus:ring-primary focus:border-transparent transition-all placeholder:text-muted-foreground/45"
-                />
-              </div>
-
-              <button
-                type="submit"
-                className="w-full bg-primary text-primary-foreground py-3 rounded-lg text-xs font-semibold hover:opacity-95 transition-opacity cursor-pointer shadow-sm hover:shadow-primary/20"
-              >
-                Save Hotel
-              </button>
-            </form>
+            <h2 className="text-lg font-serif text-foreground mb-6 font-semibold">Register Luxury Hotel</h2>
+            <AddHotelForm addHotelAction={addHotel} />
           </div>
 
           {/* Hotels List */}
@@ -406,84 +308,8 @@ export default async function AdminDashboard({ searchParams }: AdminDashboardPro
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
           {/* Add Room Form */}
           <div className="bg-card border border-border p-6 rounded-2xl shadow-sm h-fit">
-            <h2 className="text-lg font-serif text-foreground mb-6">List New Suite / Room</h2>
-            <form action={addRoom} className="space-y-4">
-              <div>
-                <label htmlFor="hotel_id" className="block text-[10px] uppercase font-bold text-muted-foreground tracking-wider mb-2">Link to Hotel</label>
-                <select
-                  name="hotel_id"
-                  id="hotel_id"
-                  required
-                  className="w-full border border-border rounded-lg px-3.5 py-2.5 bg-background text-foreground text-xs focus:outline-none focus:ring-1 focus:ring-primary focus:border-transparent transition-all"
-                >
-                  <option value="">Select an estate...</option>
-                  {hotels?.map((hotel) => (
-                    <option key={hotel.id} value={hotel.id}>
-                      {hotel.name}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              <div>
-                <label htmlFor="type" className="block text-[10px] uppercase font-bold text-muted-foreground tracking-wider mb-2">Room Type</label>
-                <input
-                  type="text"
-                  name="type"
-                  id="type"
-                  required
-                  placeholder="e.g., Luxury King Suite"
-                  className="w-full border border-border rounded-lg px-4 py-2.5 bg-background text-foreground text-xs focus:outline-none focus:ring-1 focus:ring-primary focus:border-transparent transition-all placeholder:text-muted-foreground/45"
-                />
-              </div>
-
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label htmlFor="capacity" className="block text-[10px] uppercase font-bold text-muted-foreground tracking-wider mb-2">Capacity (Guests)</label>
-                  <input
-                    type="number"
-                    name="capacity"
-                    id="capacity"
-                    required
-                    min={1}
-                    placeholder="e.g., 2"
-                    className="w-full border border-border rounded-lg px-4 py-2.5 bg-background text-foreground text-xs focus:outline-none focus:ring-1 focus:ring-primary focus:border-transparent transition-all placeholder:text-muted-foreground/45"
-                  />
-                </div>
-
-                <div>
-                  <label htmlFor="price_per_night" className="block text-[10px] uppercase font-bold text-muted-foreground tracking-wider mb-2">Price/Night (₹)</label>
-                  <input
-                    type="number"
-                    name="price_per_night"
-                    id="price_per_night"
-                    required
-                    min={0}
-                    placeholder="e.g., 5500"
-                    className="w-full border border-border rounded-lg px-4 py-2.5 bg-background text-foreground text-xs focus:outline-none focus:ring-1 focus:ring-primary focus:border-transparent transition-all placeholder:text-muted-foreground/45"
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label htmlFor="room_image_url" className="block text-[10px] uppercase font-bold text-muted-foreground tracking-wider mb-2">Image URL (Optional)</label>
-                <input
-                  type="url"
-                  name="image_url"
-                  id="room_image_url"
-                  placeholder="https://example.com/room.jpg"
-                  className="w-full border border-border rounded-lg px-4 py-2.5 bg-background text-foreground text-xs focus:outline-none focus:ring-1 focus:ring-primary focus:border-transparent transition-all placeholder:text-muted-foreground/45"
-                />
-              </div>
-
-              <button
-                type="submit"
-                disabled={hotels?.length === 0}
-                className="w-full bg-primary text-primary-foreground py-3 rounded-lg text-xs font-semibold hover:opacity-95 transition-opacity disabled:opacity-50 cursor-pointer shadow-sm hover:shadow-primary/20"
-              >
-                Save Room
-              </button>
-            </form>
+            <h2 className="text-lg font-serif text-foreground mb-6 font-semibold">List New Suite / Room</h2>
+            <AddRoomForm hotels={hotels || []} addRoomAction={addRoom} />
           </div>
 
           {/* Rooms List */}
@@ -568,6 +394,9 @@ export default async function AdminDashboard({ searchParams }: AdminDashboardPro
                         <td className="px-6 py-4">
                           <div className="font-semibold text-foreground">{booking.guest_name || "Guest User"}</div>
                           <div className="text-[10px] text-muted-foreground mt-0.5">{booking.guest_email || "N/A"}</div>
+                          {booking.guest_phone && (
+                            <div className="text-[10px] text-muted-foreground mt-0.5 font-mono">{booking.guest_phone}</div>
+                          )}
                         </td>
                         <td className="px-6 py-4">
                           <div className="font-bold capitalize">
@@ -599,39 +428,7 @@ export default async function AdminDashboard({ searchParams }: AdminDashboardPro
                         </td>
                         <td className="px-6 py-4 text-right">
                           <div className="flex gap-2 justify-end">
-                            {booking.status === "pending" && (
-                              <>
-                                <form action={approveBooking} className="inline-block">
-                                  <input type="hidden" name="bookingId" value={booking.id} />
-                                  <button
-                                    type="submit"
-                                    className="text-[10px] font-semibold bg-success/10 text-success border border-success/20 hover:bg-success hover:text-primary-foreground hover:border-success px-3.5 py-1.5 rounded-lg cursor-pointer transition-all"
-                                  >
-                                    Approve
-                                  </button>
-                                </form>
-                                <form action={rejectBooking} className="inline-block">
-                                  <input type="hidden" name="bookingId" value={booking.id} />
-                                  <button
-                                    type="submit"
-                                    className="text-[10px] font-semibold bg-destructive/10 text-destructive border border-destructive/20 hover:bg-destructive hover:text-primary-foreground hover:border-destructive px-3.5 py-1.5 rounded-lg cursor-pointer transition-all"
-                                  >
-                                    Reject
-                                  </button>
-                                </form>
-                              </>
-                            )}
-                            {booking.status === "confirmed" && (
-                              <form action={cancelBooking} className="inline-block">
-                                <input type="hidden" name="bookingId" value={booking.id} />
-                                <button
-                                  type="submit"
-                                  className="text-[10px] font-semibold bg-destructive/10 text-destructive border border-destructive/20 hover:bg-destructive hover:text-primary-foreground hover:border-destructive px-3.5 py-1.5 rounded-lg cursor-pointer transition-all"
-                                >
-                                  Cancel
-                                </button>
-                              </form>
-                            )}
+
                             <form action={deleteBooking} className="inline-block">
                               <input type="hidden" name="bookingId" value={booking.id} />
                               <button
