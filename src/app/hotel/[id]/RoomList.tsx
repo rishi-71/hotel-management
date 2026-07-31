@@ -264,6 +264,12 @@ function RoomCard({ room, fallbackRoomImages, onBookNow }: RoomCardProps) {
               room={room}
               fallbackRoomImages={fallbackRoomImages}
               onBookNow={(r) => {
+                // If visitor is not logged in, redirect to login page with return URL
+                if (!userEmail) {
+                  window.location.href = `/login?next=${encodeURIComponent(window.location.pathname)}`;
+                  return;
+                }
+
                 setSelectedRoom(r);
                 setError(null);
                 setSuccess(false);
