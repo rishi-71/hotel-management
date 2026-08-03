@@ -90,12 +90,12 @@ export default async function RootLayout({
 
         {/* Premium Footer */}
         <footer className="border-t border-border bg-secondary text-secondary-foreground mt-auto py-12">
-          <div className="max-w-7xl mx-auto px-6 grid grid-cols-1 md:grid-cols-4 gap-8">
-            <div className="space-y-4">
+          <div className="max-w-7xl mx-auto px-6 grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div className="space-y-4 md:col-span-2">
               <span className="text-xl font-bold tracking-wider">
                 <span className="text-primary font-serif">L</span>UXE<span className="text-primary font-serif">S</span>TAY
               </span>
-              <p className="text-xs text-muted-foreground leading-relaxed">
+              <p className="text-xs text-muted-foreground leading-relaxed max-w-md">
                 Curating the finest stays and luxury escapes for the discerning traveler. Elevate your journey with LuxeStay.
               </p>
             </div>
@@ -106,25 +106,6 @@ export default async function RootLayout({
                 <li><Link href="/" className="hover:text-primary transition-colors">Home</Link></li>
                 <li><Link href="/admin" className="hover:text-primary transition-colors">Admin Dashboard</Link></li>
               </ul>
-            </div>
-
-
-
-            <div>
-              <h4 className="text-xs font-bold uppercase tracking-widest text-primary mb-4">Newsletter</h4>
-              <p className="text-xs text-muted-foreground mb-4 leading-relaxed">
-                Subscribe to get exclusive luxury deals and guides.
-              </p>
-              <div className="flex gap-2">
-                <input
-                  type="email"
-                  placeholder="your@email.com"
-                  className="bg-background text-foreground text-xs px-3 py-2 rounded border border-border focus:outline-none focus:ring-1 focus:ring-primary w-full"
-                />
-                <button className="bg-primary text-primary-foreground text-xs px-3 py-2 rounded font-medium hover:opacity-90 transition-opacity cursor-pointer">
-                  Join
-                </button>
-              </div>
             </div>
           </div>
           <div className="max-w-7xl mx-auto px-6 border-t border-muted mt-10 pt-6 flex flex-col sm:flex-row justify-between items-center gap-4">

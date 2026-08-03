@@ -60,8 +60,13 @@ export default function LoginPage() {
       <div className="w-full max-w-md p-8 rounded-2xl border border-border bg-card shadow-xl animate-slide-up">
         {/* Brand Logo & Name */}
         <div className="text-center mb-8">
-          <Link href="/" className="inline-flex items-center gap-2 text-2xl font-bold tracking-wider text-foreground">
-            <span className="text-primary font-serif">L</span>UXE<span className="text-primary font-serif">S</span>TAY
+          <Link href="/" className="inline-flex flex-col items-center hover:opacity-90 transition-opacity select-none">
+            <span className="text-2xl font-bold tracking-wider text-foreground leading-none">
+              <span className="text-primary font-serif">L</span>UXE<span className="text-primary font-serif">S</span>TAY
+            </span>
+            <span className="text-[9px] font-medium tracking-[0.14em] text-primary uppercase mt-1 leading-none">
+              Luxury Stays in Indore
+            </span>
           </Link>
           <h2 className="text-xl font-semibold mt-4 text-foreground">Welcome back</h2>
           <p className="text-sm text-muted-foreground mt-1">Sign in to manage your luxury experience</p>

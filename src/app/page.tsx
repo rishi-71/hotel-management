@@ -88,8 +88,9 @@ export default async function Home({ searchParams }: HomeProps) {
             {filteredHotels.map((hotel, index) => {
               const image = hotel.image_url || fallbackImages[index % fallbackImages.length];
               return (
-                <div 
+                <Link 
                   key={hotel.id} 
+                  href={`/hotel/${hotel.id}`}
                   className="group rounded-2xl border border-border bg-card overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col h-full hover:translate-y-[-4px]"
                 >
                   {/* Image wrapper */}
@@ -106,7 +107,7 @@ export default async function Home({ searchParams }: HomeProps) {
                       4.8
                     </div>
                   </div>
-
+ 
                   {/* Card Content */}
                   <div className="p-6 flex flex-col flex-1">
                     <div className="mb-4">
@@ -119,22 +120,21 @@ export default async function Home({ searchParams }: HomeProps) {
                         {hotel.location}
                       </div>
                     </div>
-
+ 
                     <p className="text-xs text-muted-foreground leading-relaxed line-clamp-3 mb-6">
                       {hotel.description || "Indulge in a premium stay characterized by elegant design, world-class amenities, and top-tier guest services."}
                     </p>
-
-                    <Link 
-                      href={`/hotel/${hotel.id}`}
+ 
+                    <div 
                       className="mt-auto w-full bg-secondary text-secondary-foreground text-center py-3 rounded-lg font-semibold text-xs border border-border group-hover:bg-primary group-hover:text-primary-foreground group-hover:border-primary transition-all shadow-sm flex items-center justify-center gap-1"
                     >
                       View Rooms
                       <svg className="w-3.5 h-3.5 transition-transform group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M9 5l7 7-7 7" />
                       </svg>
-                    </Link>
+                    </div>
                   </div>
-                </div>
+                </Link>
               );
             })}
           </div>

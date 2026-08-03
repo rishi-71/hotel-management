@@ -3,7 +3,6 @@
 import React, { useState } from "react";
 import Link from "next/link";
 import ThemeToggle from "./ThemeToggle";
-import NavbarDropdown from "./NavbarDropdown";
 
 interface HeaderProps {
   user: { email?: string } | null;
@@ -17,37 +16,44 @@ export default function Header({ user, userIsAdmin, dropdownHotels, signOutActio
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border bg-background/85 backdrop-blur-md">
-      <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
+      <div className="max-w-[1440px] mx-auto px-4 md:px-8 h-20 flex items-center justify-between">
         {/* Logo */}
-        <Link href="/" className="flex items-center gap-2 text-2xl font-bold tracking-wider text-foreground hover:opacity-90 transition-opacity">
-          <span className="text-primary font-serif">L</span>UXE<span className="text-primary font-serif">S</span>TAY
+        <Link href="/" className="flex flex-col hover:opacity-90 transition-opacity select-none">
+          <span className="text-2xl font-bold tracking-wider text-foreground leading-none">
+            <span className="text-primary font-serif">L</span>UXE<span className="text-primary font-serif">S</span>TAY
+          </span>
+          <span className="text-[9px] font-medium tracking-[0.14em] text-primary uppercase mt-1 leading-none">
+            Luxury Stays in Indore
+          </span>
         </Link>
 
         {/* Desktop Navigation Links */}
-        <nav className="hidden md:flex items-center gap-8">
-          <Link href="/" className="text-sm font-medium hover:text-primary transition-colors text-foreground">
-            Home
-          </Link>
-          
-          <NavbarDropdown hotels={dropdownHotels} />
+        <nav className="hidden md:flex items-center gap-4">
+          <div className="flex flex-wrap items-center gap-3.5 border-r border-border/60 pr-3.5">
+            {dropdownHotels?.map((hotel) => (
+              <Link
+                key={hotel.id}
+                href={`/hotel/${hotel.id}`}
+                className="text-[11px] font-bold tracking-wide text-muted-foreground hover:text-primary transition-colors whitespace-nowrap"
+              >
+                {hotel.name.replace(" Hotel", "").replace(" Indore", "")}
+              </Link>
+            ))}
+          </div>
 
-          {user && (
-            <Link href="/bookings" className="text-sm font-medium hover:text-primary transition-colors text-foreground">
+          <div className="flex items-center gap-4">
+            <Link href="/bookings" className="text-[11px] font-bold tracking-wide text-muted-foreground hover:text-primary transition-colors whitespace-nowrap">
               My Bookings
             </Link>
-          )}
-          {userIsAdmin && (
-            <Link href="/admin" className="text-sm font-medium hover:text-primary transition-colors text-foreground">
-              Admin Dashboard
-            </Link>
-          )}
-
-          <a href="#" className="text-sm font-medium hover:text-primary transition-colors text-foreground">
-            Support
-          </a>
-          <a href="#" className="text-sm font-medium hover:text-primary transition-colors text-foreground">
-            Contact Us
-          </a>
+            {userIsAdmin && (
+              <Link href="/admin" className="text-[11px] font-bold tracking-wide text-muted-foreground hover:text-primary transition-colors whitespace-nowrap">
+                Admin
+              </Link>
+            )}
+            <a href="#" className="text-[11px] font-bold tracking-wide text-muted-foreground hover:text-primary transition-colors whitespace-nowrap">
+              Contact Us
+            </a>
+          </div>
         </nav>
 
         {/* Right Section (Theme Toggle + Auth + Hamburger) */}
@@ -69,17 +75,12 @@ export default function Header({ user, userIsAdmin, dropdownHotels, signOutActio
                 </button>
               </div>
             ) : (
-              <div className="flex items-center gap-3">
-                <Link href="/login" className="text-xs font-semibold text-foreground hover:text-primary transition-colors px-4 py-2">
-                  Sign In
-                </Link>
-                <Link href="/signup" className="text-xs font-semibold bg-primary text-primary-foreground hover:opacity-95 px-4 py-2 rounded-lg cursor-pointer transition-all shadow-sm hover:shadow-primary/25">
-                  Register
-                </Link>
-              </div>
+              <Link href="/login" className="text-xs font-semibold bg-primary text-primary-foreground hover:opacity-95 px-5 py-2.5 rounded-lg cursor-pointer transition-all shadow-sm hover:shadow-primary/25">
+                Sign In
+              </Link>
             )}
           </div>
-
+ 
           {/* Mobile Hamburger Button */}
           <button
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
@@ -103,18 +104,10 @@ export default function Header({ user, userIsAdmin, dropdownHotels, signOutActio
       {mobileMenuOpen && (
         <div className="md:hidden border-t border-border bg-card w-full py-6 px-6 space-y-6 shadow-xl animate-slide-up">
           <div className="flex flex-col gap-4">
-            <Link 
-              href="/" 
-              onClick={() => setMobileMenuOpen(false)}
-              className="text-sm font-semibold hover:text-primary py-1.5 transition-colors border-b border-border/40 pb-2 text-foreground"
-            >
-              Home
-            </Link>
-
-            {/* Mobile Top Hotels List */}
+            {/* Mobile Hotels List */}
             <div className="space-y-2">
               <span className="text-[10px] uppercase font-bold text-muted-foreground tracking-wider">
-                Indore&apos;s Top Hotels
+                Our Hotels
               </span>
               <div className="grid grid-cols-1 gap-2.5 pl-2 max-h-40 overflow-y-auto border-l border-border/70 py-1">
                 {dropdownHotels.map(hotel => (
@@ -130,15 +123,13 @@ export default function Header({ user, userIsAdmin, dropdownHotels, signOutActio
               </div>
             </div>
 
-            {user && (
-              <Link 
-                href="/bookings" 
-                onClick={() => setMobileMenuOpen(false)}
-                className="text-sm font-semibold hover:text-primary py-1.5 transition-colors border-b border-border/40 pb-2 text-foreground"
-              >
-                My Bookings
-              </Link>
-            )}
+            <Link 
+              href="/bookings" 
+              onClick={() => setMobileMenuOpen(false)}
+              className="text-sm font-semibold hover:text-primary py-1.5 transition-colors border-b border-border/40 pb-2 text-foreground"
+            >
+              My Bookings
+            </Link>
 
             {userIsAdmin && (
               <Link 
@@ -149,14 +140,6 @@ export default function Header({ user, userIsAdmin, dropdownHotels, signOutActio
                 Admin Dashboard
               </Link>
             )}
-
-            <a 
-              href="#" 
-              onClick={() => setMobileMenuOpen(false)}
-              className="text-sm font-semibold hover:text-primary py-1.5 transition-colors border-b border-border/40 pb-2 text-foreground"
-            >
-              Support
-            </a>
 
             <a 
               href="#" 
@@ -189,16 +172,9 @@ export default function Header({ user, userIsAdmin, dropdownHotels, signOutActio
                 <Link 
                   href="/login" 
                   onClick={() => setMobileMenuOpen(false)}
-                  className="w-full text-center text-xs font-semibold text-foreground bg-secondary hover:bg-muted py-3 rounded-xl border border-border transition-colors"
-                >
-                  Sign In
-                </Link>
-                <Link 
-                  href="/signup" 
-                  onClick={() => setMobileMenuOpen(false)}
                   className="w-full text-center text-xs font-semibold bg-primary text-primary-foreground hover:opacity-95 py-3 rounded-xl cursor-pointer transition-all shadow-sm hover:shadow-primary/25"
                 >
-                  Register
+                  Sign In
                 </Link>
               </div>
             )}
